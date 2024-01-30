@@ -12,12 +12,16 @@ def select_folder():
 
 def merge_pdfs(folder_path):
     if not folder_path:
-        st.sidebar.warning("Veuillez sélectionner un dossier.")
+        st.sidebar.warning("Please select a folder.")
+        return
+
+    if not os.path.isdir(folder_path):
+        st.sidebar.warning("Invalid folder path.")
         return
 
     pdf_files = [file for file in os.listdir(folder_path) if file.endswith('.pdf')]
     if not pdf_files:
-        st.sidebar.warning("Aucun fichier PDF n'a été trouvé dans le dossier sélectionné.")
+        st.sidebar.warning("No PDF files found in the selected folder.")
         return
 
     merger = PdfMerger()
@@ -25,10 +29,10 @@ def merge_pdfs(folder_path):
         with open(os.path.join(folder_path, pdf_file), 'rb') as file:
             merger.append(file)
 
-    output_file_path = os.path.join(folder_path, "Fichier_Fusionne.pdf")
+    output_file_path = os.path.join(folder_path, "merged.pdf")
     with open(output_file_path, 'wb') as output_file:
         merger.write(output_file)
-    st.sidebar.success(f"Fusion réussie des fichiers PDF. Le fichier fusionné est enregistré en tant que: {output_file_path}")
+    st.sidebar.success(f"PDF files merged successfully. Merged file saved as: {output_file_path}")
     return output_file_path
 
 def main():
