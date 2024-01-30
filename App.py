@@ -5,46 +5,38 @@ from tabula import read_pdf
 import pandas as pd
 import base64
 
-# Fonction de sélection du dossier contenant les fichiers PDF
+# Function to select the folder containing the PDF files
 def select_folder():
-    folder_path = st.sidebar.text_input("Saisir le chemin du dossier contenant les fichiers PDF:")
-    return folder_path
+    folder_path = st.sidebar.file_uploader("Sélectionner le dossier contenant les fichiers PDF", type="pdf", accept_multiple_files=False)
+    if folder_path:
+        return folder_path.name, folder_path.getvalue()
+    return None, None
 
-def merge_pdfs(folder_path):
-    if not folder_path:
-        st.sidebar.warning("Please select a folder.")
-        return
-
-    if not os.path.isdir(folder_path):
-        st.sidebar.warning("Invalid folder path.")
-        return
-
-    pdf_files = [file for file in os.listdir(folder_path) if file.endswith('.pdf')]
+def merge_pdfs(pdf_files):
     if not pdf_files:
-        st.sidebar.warning("No PDF files found in the selected folder.")
+        st.sidebar.warning("Veuillez sélectionner un dossier contenant des fichiers PDF.")
         return
 
     merger = PdfMerger()
-    for pdf_file in pdf_files:
-        with open(os.path.join(folder_path, pdf_file), 'rb') as file:
-            merger.append(file)
+    for pdf_file_name, pdf_file_content in pdf_files:
+        merger.append(pdf_file_content)
 
-    output_file_path = os.path.join(folder_path, "merged.pdf")
+    output_file_path = "Fichier_Fusionne.pdf"
     with open(output_file_path, 'wb') as output_file:
         merger.write(output_file)
-    st.sidebar.success(f"PDF files merged successfully. Merged file saved as: {output_file_path}")
+    st.sidebar.success(f"Fusion réussie des fichiers PDF. Le fichier fusionné est enregistré en tant que: {output_file_path}")
     return output_file_path
 
 def main():
-    st.title("Hello, Bienvenue votre nouvelle Plateforme...")
+    st.title("Hello, Bienvenue sur votre nouvelle Plateforme...")
 
-    folder_path = select_folder()
-    if st.sidebar.button("DEMARRER"):
-        merged_pdf_path = merge_pdfs(folder_path)
+    folder_name, folder_content = select_folder()
+    if folder_content:
+        merged_pdf_path = merge_pdfs([(folder_name, folder_content)])
         if merged_pdf_path:
             df_list = read_pdf(merged_pdf_path, encoding='ISO-8859-1', stream=True, area=[269.875, 12.75, 790.5, 961], guess=False, pages='all')
             result_df = pd.concat(df_list, ignore_index=True)
-            excel_output_path = os.path.join(folder_path, "Fichier_Extrait.xlsx")
+            excel_output_path = "Fichier_Extrait.xlsx"
             result_df.to_excel(excel_output_path, index=False)
             st.sidebar.success(f"Les Fichiers ont été enregistrées dans {excel_output_path}")
             st.markdown("<h2 style='text-align: center;'>TELECHARGER LE FICHIER EXCEL ICI :)</h2>", unsafe_allow_html=True)
