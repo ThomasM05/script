@@ -32,7 +32,7 @@ def main():
     if pdf_files:
         merged_pdf_path = merge_pdfs(pdf_files)
         if merged_pdf_path:
-            df_list = read_pdf(merged_pdf_path, encoding='ISO-8859-1', stream=True, area=[269.875, 12.75, 790.5, 961], guess=False, pages='all')
+            df_list = read_pdf(merged_pdf_path, encoding='ISO-8859-1', stream=True, area=[269.875, 12.75, 790.5, 961], guess=False, pages='all', java_options="-Djava.awt.headless=true")
             result_df = pd.concat(df_list, ignore_index=True)
             excel_output_path = "Fichier_Extrait.xlsx"
             result_df.to_excel(excel_output_path, index=False)
